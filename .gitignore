@@ -1,0 +1,6 @@
+*.env
+todo_client/certs/*
+todo_server/certs/*
+*/node_modules/
+*/package-lock.json
+node_modules/

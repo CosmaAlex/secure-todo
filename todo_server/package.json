@@ -1,0 +1,19 @@
+{
+  "name": "todo_server",
+  "version": "1.0.0",
+  "description": "Server to store encrypted TODO files",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "Cosma Alex Vergari",
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1"
+  }
+}
