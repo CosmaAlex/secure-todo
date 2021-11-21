@@ -12,14 +12,16 @@ import config
 
 LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone(datetime.timedelta(0))).astimezone().tzinfo
 
-debug = 1
+# Enable verbose output
+debug = 1 
 keyfile = ""
 noncefile = ""
 
-# Parse command line arguments
+"""Prints the usage of the program with a message explaining the error"""
 def print_usage(msg):
     print(msg + " Format: client.py [-du] [-e] [keyfile] [noncefile]")
 
+"""Show a question and ask for answer until it is 'y' or 'n'"""
 def yesno(msg):
     inp = ""
     while not inp:
@@ -30,6 +32,7 @@ def yesno(msg):
     return inp
     
 
+# Parse command line arguments
 argv = sys.argv[1:]
 download = True
 encrypt = True
@@ -40,12 +43,14 @@ except:
     print_usage("Invalid option.")
     exit(1)
 
+# Download or upload?
 if '-u' in opts:
     if '-d' in opts:
         print_usage("Can only do one operation at a time")
         exit(1)
     download = False
 
+# Encryption parameters parsing
 if '-e' not in opts:
     encrypt = False
 else:
@@ -56,6 +61,7 @@ else:
         keyfile = args[0]
         noncefile = args[1]
 
+
 if debug: 
     print("Download: " + str(download) + "\nEncrypt: " + str(encrypt))
     print("Loading client certificate from : " + config.client_cert)
@@ -65,6 +71,8 @@ if debug:
         print("Nonce file path : " + noncefile)
 
 filename = config.filename
+# VirtualFile object that performs the appropriate operation
+# depending on the passed parameters
 file = VirtualFile(filename, encrypt, keyfile, noncefile)
 
 # First GET the file to check if it has been modified elsewhere
@@ -83,14 +91,14 @@ else:
             print("Remote file timestamp: " + str(last_mod_remote))
             print("Local file timestamp: " + str(last_mod_local))
 
+        # Check for concurrent writing to file by 2 machines (merge problems)
         if (not download and last_mod_remote > last_mod_local) or (download and last_mod_local > last_mod_remote):
             if not download and last_mod_remote > last_mod_local:
                 result = yesno("The remote file is newer than the local one. Do you want to overwrite it?")
             if download and last_mod_local > last_mod_remote:
                 result = yesno("The local file is newer than the remote one. Do you want to overwrite it?")
             if result == 'n':
-                filename += "_remote"
-                print("A new file will be created here with remote content : " + filename)
+                print("I will append at the bottom of " + filename + " the remote version of the file")
                 print("Solve the conflict and update the new version")
                 file.vappend(r.content)
                 exit(0)
@@ -104,14 +112,23 @@ else:
             print("The file at " + filename + " does not exist")
             exit(1)
 
+# Perform the actual intended operation from/to the server using the server 
+# certificate as CA (if it is self-signed)
 if download:
+    # Download the (encrypted) raw file from server (and decrypt it)
     r = get(config.host_addr + ":" + str(config.host_port) + config.host_endpoint, pkcs12_filename=config.client_cert, pkcs12_password="", verify=config.server_cert)
 
     if r.status_code == 200:
         print("Received file from server. Saving to " + filename)
         file.vwrite(r.content)
+    else:
+        print("There has been an error while asking file to server")
 else:
-    # Upload the file
+    # Read the (encrypted) content from file and send it
     newdata = file.vread()
     r = post(config.host_addr + ":" + str(config.host_port) + config.host_endpoint, pkcs12_filename=config.client_cert, pkcs12_password="", verify=config.server_cert, headers={'Content-Type': 'application/octet-stream'}, data=newdata)
-        
+
+    if r.status_code == 200:
+        print("File correctly sent to server")
+    else:
+        print("There has been a problem while uploading to server")
