@@ -1,2 +1,5 @@
-run:
-	. ../env_vars.env; python3 client.py
+down:
+	python3 client.py -de
+
+up:
+	python3 client.py -ue
