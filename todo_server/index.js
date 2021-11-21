@@ -1,3 +1,4 @@
+require('dotenv').config({ path: '../.env' })
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
@@ -9,11 +10,11 @@ const helmet = require('helmet');
 const filename = "todo.txt";
 
 const opts = {
-	key: fs.readFileSync('certs/server_key.pem'),
-	cert: fs.readFileSync('certs/server_cert.pem'),
+	key: fs.readFileSync('../' + process.env.SERVER_KEY),
+	cert: fs.readFileSync('../' + process.env.SERVER_CERT),
 	requestCert: true,
 	rejectUnauthorized: false,
-	ca: [ fs.readFileSync('certs/server_cert.pem') ]
+	ca: [ fs.readFileSync('../' + process.env.SERVER_CERT) ]
 }
 
 const app = express();

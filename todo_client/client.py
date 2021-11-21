@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
-from requests_pkcs12 import get
 import os
+from requests_pkcs12 import get
+from dotenv import load_dotenv
+
+load_dotenv('../.env')
 
 debug = 1
 

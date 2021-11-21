@@ -1,6 +1,6 @@
 *.env
-todo_client/certs/*
-todo_server/certs/*
+todo_client/secrets/*
+todo_server/secrets/*
 */node_modules/
 */package-lock.json
 node_modules/
