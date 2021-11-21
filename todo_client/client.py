@@ -9,6 +9,7 @@ from requests_pkcs12 import get, post
 from dotenv import load_dotenv
 
 load_dotenv('../.env')
+LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone(datetime.timedelta(0))).astimezone().tzinfo
 
 # Define options and constants
 debug = 1
@@ -78,29 +79,33 @@ else:
             print("Aborting")
             exit(2)
     else:
-        last_mod_remote = parser.parse(r.headers['Last-Modified'])
-        last_mod_local = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
-        if debug:
-            print("Remote file timestamp: " + last_mod_remote)
-            print("Local file timestamp: " + last_mod_local)
+        if (os.path.exists(filename)):
+            last_mod_remote = parser.parse(r.headers['Last-Modified'])
+            last_mod_local = datetime.datetime.fromtimestamp(os.path.getmtime(filename), LOCAL_TIMEZONE)
+            if debug:
+                print("Remote file timestamp: " + str(last_mod_remote))
+                print("Local file timestamp: " + str(last_mod_local))
 
-        if (last_mod_remote > last_mod_local):
-            result = yesno("The remote file is newer than the local one. Do you want to overwrite it?")
-            if result == 'n':
-                filename += "_remote"
-                print("A new file will be created here with remote content : " + filename)
-                print("Solve the conflict, update the local file and then redo an upload")
-                try:
-                    with open(filename, "wb") as bf:
-                        bf.write(r.content)
-                        bf.close()
-                except:
-                    print("Exception while writing to file");
-                exit(0)
+            if (last_mod_remote > last_mod_local):
+                result = yesno("The remote file is newer than the local one. Do you want to overwrite it?")
+                if result == 'n':
+                    filename += "_remote"
+                    print("A new file will be created here with remote content : " + filename)
+                    print("Solve the conflict, update the local file and then redo an upload")
+                    try:
+                        with open(filename, "wb") as bf:
+                            bf.write(r.content)
+                            bf.close()
+                    except:
+                        print("Exception while writing to file");
+                    exit(0)
 
-            if result != 'y':
-                print("Invalid answer")
-                exit(1)
-        
-    # TODO: Upload the file
+                if result != 'y':
+                    print("Invalid answer")
+                    exit(1)
+    
+    # Upload the file
+    with open(filename, "rb") as rf:
+        r = post(host_addr + ":" + str(host_port) + host_endpoint, pkcs12_filename=client_cert, pkcs12_password="", verify=server_cert, headers={'Content-Type': 'application/octet-stream'}, data=rf.read())
+        rf.close()
         
