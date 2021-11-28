@@ -112,12 +112,11 @@ else:
 # Perform the actual intended operation from/to the server using the server 
 # certificate as CA (if it is self-signed)
 if download:
-    # Download the (encrypted) raw file from server (and decrypt it)
-    r = get(config.host_addr + ":" + str(config.host_port) + config.host_endpoint, pkcs12_filename=config.client_cert, pkcs12_password="", verify=config.server_cert)
-
     if r.status_code == 200:
         print("Received file from server. Saving to " + filename)
-        file.vwrite(r.content)
+        if file.vwrite(r.content) != 0:
+            print("Error while writing to file. Closing...")
+            exit(1)
     else:
         print("There has been an error while asking file to server")
 else:
