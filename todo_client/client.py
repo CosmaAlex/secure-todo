@@ -15,11 +15,10 @@ LOCAL_TIMEZONE = datetime.datetime.now(datetime.timezone(datetime.timedelta(0)))
 # Enable verbose output
 debug = 1 
 keyfile = ""
-noncefile = ""
 
 """Prints the usage of the program with a message explaining the error"""
 def print_usage(msg):
-    print(msg + " Format: client.py [-du] [-e] [keyfile] [noncefile]")
+    print(msg + " Format: client.py [-du] [-e] [keyfile]")
 
 """Show a question and ask for answer until it is 'y' or 'n'"""
 def yesno(msg):
@@ -54,12 +53,11 @@ if '-u' in opts:
 if '-e' not in opts:
     encrypt = False
 else:
-    if len(args) != 2:
-        print_usage("Key and nonce file needed")
+    if len(args) != 1:
+        print_usage("Key file needed")
         exit(1)
     else:
         keyfile = args[0]
-        noncefile = args[1]
 
 
 if debug: 
@@ -68,12 +66,11 @@ if debug:
     print("Loading server certificate from : " + config.server_cert)
     if encrypt:
         print("Key file path : " + keyfile)
-        print("Nonce file path : " + noncefile)
 
 filename = config.filename
 # VirtualFile object that performs the appropriate operation
 # depending on the passed parameters
-file = VirtualFile(filename, encrypt, keyfile, noncefile)
+file = VirtualFile(filename, encrypt, keyfile)
 
 # First GET the file to check if it has been modified elsewhere
 r = get(config.host_addr + ":" + str(config.host_port) + config.host_endpoint, pkcs12_filename=config.client_cert, pkcs12_password="", verify=config.server_cert)

@@ -1,7 +1,11 @@
-*.env
 todo_client/secrets/*
 todo_server/secrets/*
+
 */node_modules/
-*/package-lock.json
 node_modules/
 */__pycache__/*
+
+*.env
+*/backup.txt
+*/package-lock.json
+todo_server/todo.txt

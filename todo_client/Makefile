@@ -1,8 +1,8 @@
 down:
-	python3 client.py -de secrets/.key secrets/.nonce
+	python3 client.py -de secrets/.key
 
 up:
-	python3 client.py -ue secrets/.key secrets/.nonce
+	python3 client.py -ue secrets/.key
 
 downnoencrypt:
 	python3 client.py -d
